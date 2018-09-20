@@ -32,6 +32,6 @@
     - vault
     - docker-registry
     - artifactory
-    - { role: nexus3, tags: test }
+    - nexus3
     - gitea
     - jenkins-master
