@@ -30,7 +30,6 @@
     - sample_ad_data
     - consul
     - vault
-    - docker-registry
     - artifactory
     - nexus3
     - gitea
