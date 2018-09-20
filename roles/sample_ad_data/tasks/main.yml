@@ -1,0 +1,62 @@
+---
+- name: 'Create AD OUs'
+  ldap_entry:
+    server_uri: 'ldaps://127.0.0.1'
+    validate_certs: no
+    bind_dn: '{{ LDAP_USER }}'
+    bind_pw: '{{ LDAP_PASS }}'
+    dn: 'ou={{ item }},{{ LDAP_OU }}'
+    objectClass:
+      - 'organizationalunit'
+      - 'top'
+    attributes:
+      ou: '{{ item }}'
+  with_items:
+    - Groups
+    - Computers
+    - Users
+
+- name: 'Create AD users'
+  ldap_entry:
+    server_uri: 'ldaps://127.0.0.1'
+    validate_certs: no
+    bind_dn: '{{ LDAP_USER }}'
+    bind_pw: '{{ LDAP_PASS }}'
+    dn: 'cn={{ item }},{{ LDAP_USERS_OU }},{{ LDAP_OU }}'
+    objectClass:
+      - 'top'
+      - 'person'
+      - 'organizationalPerson'
+      - 'user'
+    attributes:
+      cn: '{{ item }}'
+      name: '{{ item }}'
+      samaccountname: '{{ item }}'
+      useraccountcontrol: 512
+      unicodePwd: '{{ "T3st123!" | utf16encode }}'
+  with_items:
+    - developer1
+    - developer2
+    - operator1
+    - operator2
+    - engineer1
+    - engineer2
+    
+- name: 'Create admin AD group'
+  ldap_entry:
+    server_uri: 'ldaps://127.0.0.1'
+    validate_certs: no
+    bind_dn: '{{ LDAP_USER }}'
+    bind_pw: '{{ LDAP_PASS }}'
+    dn: 'cn={{ item.name }},{{ LDAP_GROUPS_OU }},{{ LDAP_OU }}'
+    objectClass:
+      - 'groupOfUniqueNames'
+      - 'top'
+    attributes:
+      ou: 'groups'
+      cn: '{{ item.name }}'
+      uniquemember: '{{ item.members | default("") }}' 
+  with_items:
+    - { name: 'Engineers', members: ['cn=engineer1,{{ LDAP_USERS_OU }},{{ LDAP_OU }}', 'cn=engineer2,{{ LDAP_USERS_OU }},{{ LDAP_OU }}'] }
+    - { name: 'Developers', members: ['cn=developer1,{{ LDAP_USERS_OU }},{{ LDAP_OU }}', 'cn=developer2,{{ LDAP_USERS_OU }},{{ LDAP_OU }}'] }
+    - { name: 'Operations', members: ['cn=operator1,{{ LDAP_USERS_OU }},{{ LDAP_OU }}', 'cn=operator2,{{ LDAP_USERS_OU }},{{ LDAP_OU }}'] }

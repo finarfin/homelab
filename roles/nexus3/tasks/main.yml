@@ -1,0 +1,66 @@
+---
+- name: 'Generate certificates for nexus'
+  include_role:
+    name: certificate
+  vars:
+    CERT_NAME: '{{ NEXUS_NAME }}'
+
+- name: 'Install containers'
+  docker_service:
+    project_name: '{{ NEXUS_NAME }}'
+    definition:
+      version: '3.5'
+      networks: '{{ NEXUS_NETWORK | default(omit) }}'
+      services:
+        nexus:
+          image: 'bradbeck/nexus-https:latest'
+          container_name: '{{ NEXUS_NAME }}'
+          ports:
+            - '{{ NEXUS_HTTP_PORT }}:8081'
+            - '{{ NEXUS_HTTPS_PORT }}:8443'
+          volumes:
+            - '{{ NEXUS_DATASTORE }}:/sonatype-work'
+          environment:
+            - 'PUBLIC_CERT=/run/secrets/nexus.crt'
+            - 'PRIVATE_KEY=/run/secrets/nexus.pem'
+          secrets:
+            - 'nexus.crt'
+            - 'nexus.pem'
+            - 'ca.crt'
+          restart: always
+      secrets:
+        nexus.crt:
+          file: '{{ NEXUS_CRT }}'
+        nexus.pem:
+          file: '{{ NEXUS_PRIVATEKEY }}'
+        ca.crt:
+          file: '{{ NEXUS_CA }}'
+
+- name: 'Wait for Nexus to come up'
+  uri:
+    url: 'http://127.0.0.1:{{ NEXUS_HTTP_PORT }}'
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 60
+  delay: 5
+
+- name: 'Get ansible-nexus3-oss role'
+  command: 'ansible-galaxy install {{ NEXUS_ROLE_SOURCE }} -p {{ NEXUS_ROLE_PATH | dirname }}'
+  
+- name: 'Declare groovy script {{ item }}'
+  uri:
+    url: 'http://127.0.0.1:{{ NEXUS_HTTP_PORT }}/service/rest/v1/script'
+    user: 'admin'
+    password: '{{ NEXUS_INITIAL_ADMIN_PASSWORD }}'
+    body_format: 'json'
+    method: 'POST'
+    force_basic_auth: yes
+    status_code: 204,500
+    body:
+      name: '{{ item | basename | splitext | first }}'
+      type: 'groovy'
+      content: '{{ lookup("file", item) }}'
+  with_fileglob: '{{ NEXUS_ROLE_PATH }}/files/groovy/*.groovy'
+
+- include_tasks: configure.yml

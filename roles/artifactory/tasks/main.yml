@@ -1,0 +1,21 @@
+---
+- name: 'Create container for Artifactory'
+  docker_service:
+    project_name: '{{ ARTIFACTORY_NAME }}'
+    definition:
+      version: '3.5'
+      networks: '{{ ARTIFACTORY_NETWORK | default(omit) }}'
+      services:
+        artifactory:
+          image: 'docker.bintray.io/jfrog/artifactory-oss:6.3.3'
+          container_name: '{{ ARTIFACTORY_NAME }}'
+          ports:
+           - '{{ ARTIFACTORY_PORT }}:8081'
+          volumes:
+           - '{{ ARTIFACTORY_DATASTORE }}:/var/opt/jfrog/artifactory'
+          restart: always
+          ulimits:
+            nproc: 65535
+            nofile:
+              soft: 32000
+              hard: 40000               

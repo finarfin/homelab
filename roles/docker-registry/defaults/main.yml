@@ -1,0 +1,13 @@
+---
+DOCKER_REG_CA_CERT: '/etc/ssl/crt/ca.crt'
+DOCKER_REG_CA_CERT_DEST: '/etc/docker/certs.d/{{ DOCKER_REG }}:{{ DOCKER_REG_PORT }}'
+DOCKER_REG_CRT: '/etc/ssl/crt/{{ DOCKER_REG }}.crt'
+DOCKER_REG_KEY: '/etc/ssl/private/{{ DOCKER_REG }}.pem'
+DOCKER_REG: 'docker-registry'
+DOCKER_REG_PORT: 5000
+DOCKER_REG_IP: '127.0.0.1'
+DOCKER_REG_DATASTORE: '/data/{{ DOCKER_REG }}'
+DOCKER_REG_NETWORK:
+  default:
+    external:
+      name: homelab-network

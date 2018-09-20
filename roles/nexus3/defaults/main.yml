@@ -1,0 +1,24 @@
+NEXUS_NAME: 'nexus'
+NEXUS_NETWORK:
+  default:
+    external:
+      name: homelab-network
+NEXUS_HTTP_PORT: 9081
+NEXUS_HTTPS_PORT: 8443
+NEXUS_DATASTORE: '/data/nexus'
+NEXUS_DOCKER_HOST_PORT: 9082
+NEXUS_INITIAL_ADMIN_PASSWORD: 'admin123'
+NEXUS_ADMIN_PASSWORD: 'test'
+NEXUS_ROLE_PATH: '/tmp/ansible-nexus3-oss'
+NEXUS_ROLE_SOURCE: 'git+https://github.com/finarfin/ansible-nexus3-oss,master'
+
+NEXUS_LDAP_SERVER: 'ldap'
+NEXUS_LDAP_OU: 'dc=example,dc=com'
+NEXUS_LDAP_USERS_OU: 'ou=Users'
+NEXUS_LDAP_GROUPS_OU: 'ou=Groups'
+NEXUS_LDAP_USER: 'cn=administrator,cn=users,dc=example,dc=com'
+NEXUS_LDAP_PASS: 'TopS3cr3t'
+
+NEXUS_CRT: '/etc/ssl/crt/{{ NEXUS_NAME }}.crt'
+NEXUS_PRIVATEKEY: '/etc/ssl/private/{{ NEXUS_NAME }}.pem'
+NEXUS_CA: '/etc/ssl/crt/ca.crt'

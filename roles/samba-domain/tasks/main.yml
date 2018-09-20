@@ -1,0 +1,47 @@
+---
+- name: 'Generate certificates for ldaps'
+  include_role:
+    name: certificate
+  vars:
+    CERT_NAME: '{{ SAMBA_NAME }}'
+
+- name: 'Check-out source repository'
+  git:
+    repo: 'https://github.com/zanyants/samba-domain'
+    dest: '/tmp/samba-domain'
+
+- name: 'Install containers'
+  docker_service:
+    project_name: '{{ SAMBA_NAME }}'
+    definition:
+      version: '3.5'
+      networks: '{{ SAMBA_NETWORK | default(omit) }}'
+      services:
+        ldap:
+          build: '/tmp/samba-domain'
+          image: 'samba-domain'
+          container_name: '{{ SAMBA_NAME }}'
+          ports:
+            - '{{ SAMBA_LDAP_PORT }}:389'
+            - '{{ SAMBA_LDAPS_PORT }}:636'
+          environment:      
+            - 'DOMAIN={{ SAMBA_DOMAIN }}'
+            - 'DOMAINPASS={{ SAMBA_ADMIN_PASS }}'
+            - 'DNSFORWARDER={{ SAMBA_DNS_FORWARDER }}'
+            - 'NOCOMPLEXITY=true'
+          volumes:
+            - '/etc/localtime:/etc/localtime:ro'
+            - '{{ SAMBA_DATASTORE }}/data:/var/lib/samba'
+            - '{{ SAMBA_DATASTORE }}/config:/etc/samba/external'
+          secrets:
+            - { source: 'ldap.crt', target: '/var/lib/samba/private/tls/cert.pem' }
+            - { source: 'ldap.pem', target: '/var/lib/samba/private/tls/key.pem' }
+            - { source: 'ca.crt', target: '/var/lib/samba/private/tls/ca.pem' }
+          restart: 'always'
+      secrets:
+        ldap.crt:
+          file: '{{ SAMBA_CRT }}'
+        ldap.pem:
+          file: '{{ SAMBA_PRIVATEKEY }}'
+        ca.crt:
+          file: '{{ SAMBA_CA }}'

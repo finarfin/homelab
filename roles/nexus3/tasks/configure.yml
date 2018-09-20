@@ -1,0 +1,68 @@
+---
+- include_vars: '{{ NEXUS_ROLE_PATH }}/defaults/main.yml'
+
+- set_fact:  
+    nexus_default_port: '{{ NEXUS_HTTP_PORT }}'
+    current_nexus_admin_password: '{{ NEXUS_INITIAL_ADMIN_PASSWORD }}'
+    ldap_connections: 
+      - ldap_name: 'Default'
+        ldap_protocol: 'ldaps'
+        ldap_hostname: '{{ NEXUS_LDAP_SERVER }}'
+        ldap_port: 636
+        ldap_auth: 'simple'
+        ldap_auth_username: '{{ NEXUS_LDAP_USER }}'
+        ldap_auth_password: '{{ NEXUS_LDAP_PASS }}'
+        ldap_search_base: '{{ NEXUS_LDAP_OU }}'
+        ldap_user_base_dn: '{{ NEXUS_LDAP_USERS_OU }}'
+        ldap_user_object_class: 'user'
+        ldap_user_id_attribute: 'sAMAccountName'
+        ldap_user_real_name_attribute: 'cn'
+        ldap_user_email_attribute: 'mail'
+        ldap_map_groups_as_roles: true
+        ldap_group_base_dn: '{{ NEXUS_LDAP_GROUPS_OU }}'
+        ldap_group_object_class: 'groupOfUniqueNames'
+        ldap_group_id_attribute: 'cn'
+        ldap_group_member_attribute: 'uniquemember'
+        ldap_group_member_format: '${dn}'
+    nexus_roles:
+      - id: Developers
+        name: developers
+        description: All development team
+        privileges:
+          - nx-search-read
+          - all-repos-read
+        roles: []
+      - id: Operations
+        name: operations
+        description: All operations team
+        privileges:
+          - nx-search-read
+          - all-repos-read
+        roles: []
+      - id: Engineers
+        name: engineers
+        description: All engineering team
+        privileges: []
+        roles: 
+          - nx-admin
+
+- include: '{{ NEXUS_ROLE_PATH }}/tasks/setup_ldap_each.yml'
+  with_items: "{{ ldap_connections }}"
+
+- include: '{{ NEXUS_ROLE_PATH }}/tasks/setup_role_each.yml'
+  with_items: "{{ nexus_roles }}"
+
+- include: '{{ NEXUS_ROLE_PATH }}/tasks/call_script.yml'
+  vars:
+    script_name: setup_anonymous_access
+    args:
+      anonymous_access: false
+      
+- include_tasks: '{{ NEXUS_ROLE_PATH }}/tasks/create_repo_docker_hosted_each.yml'
+  with_items: '{{ nexus_repos_docker_hosted }}'
+
+- include_tasks: '{{ NEXUS_ROLE_PATH }}/tasks/create_repo_docker_proxy_each.yml'
+  with_items: '{{ nexus_repos_docker_proxy }}'
+
+- include_tasks: '{{ NEXUS_ROLE_PATH }}/tasks/create_repo_docker_group_each.yml'
+  with_items: '{{ nexus_repos_docker_group }}'

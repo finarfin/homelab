@@ -1,0 +1,43 @@
+---
+- name: 'Generate certificates for ldaps'
+  include_role:
+    name: certificate
+  vars:
+    CERT_NAME: '{{ LDAP_NAME }}'
+         
+- name: 'Install containers'
+  docker_service:
+    project_name: '{{ LDAP_NAME }}'
+    definition:
+      version: '3.5'
+      networks: '{{ LDAP_NETWORK | default(omit) }}'
+      services:
+        ldap:
+          image: 'osixia/openldap'
+          container_name: '{{ LDAP_NAME }}'
+          command: '--copy-service'
+          ports:
+            - '{{ LDAP_PORT }}:389'
+            - '{{ LDAPS_PORT }}:636'
+          environment:      
+            - 'LDAP_ORGANISATION={{ LDAP_ORGANISATION }}'
+            - 'LDAP_DOMAIN={{ LDAP_DOMAIN }}'
+            - 'LDAP_ADMIN_PASSWORD={{ LDAP_ADMIN_PASSWORD }}'
+            - 'LDAP_TLS_CRT_FILENAME=ldap.crt'
+            - 'LDAP_TLS_KEY_FILENAME=ldap.pem'
+            - 'LDAP_TLS_CA_CRT_FILENAME=ca.crt'
+            - 'LDAP_TLS_VERIFY_CLIENT=try'
+          volumes:
+            - '{{ LDAP_SEED_FILE }}:/container/service/slapd/assets/config/bootstrap/ldif/custom/seed.ldif'
+          secrets:
+            - { source: 'ldap.crt', target: '/container/service/slapd/assets/certs/ldap.crt' }
+            - { source: 'ldap.pem', target: '/container/service/slapd/assets/certs/ldap.pem' }
+            - { source: 'ca.crt', target: '/container/service/slapd/assets/certs/ca.crt' }
+          restart: 'always'
+      secrets:
+        ldap.crt:
+          file: '{{ LDAP_CRT }}'
+        ldap.pem:
+          file: '{{ LDAP_PRIVATEKEY }}'
+        ca.crt:
+          file: '{{ LDAP_CA }}'

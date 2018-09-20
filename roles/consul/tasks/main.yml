@@ -1,0 +1,20 @@
+---
+- docker_service:
+    project_name: '{{ CONSUL_NAME }}'
+    definition:
+      version: '3.5'
+      networks: '{{ CONSUL_NETWORK | default(omit) }}'
+      services:
+        consul:
+          image: 'consul:latest'
+          container_name: '{{ CONSUL_NAME }}'
+          command: 'agent -server -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect=1 -ui'
+          ports:
+            - '{{ CONSUL_SERVER }}:8300'
+            - '{{ CONSUL_SERF_LAN }}:8301/udp'
+            - '{{ CONSUL_SERF_WAN }}:802/udp'
+            - '{{ CONSUL_HTTP }}:8500'
+            - '{{ CONSUL_DNS }}:8600/udp'
+          volumes:
+            - '{{ CONSUL_DATASTORE }}:/consul/data'
+          restart: 'always'

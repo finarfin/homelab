@@ -1,0 +1,12 @@
+---
+GITEA_NAME: 'gitea'
+GITEA_HTTP_PORT: 3000
+GITEA_SSH_PORT: 10022
+GITEA_DATASTORE: '/data/gitea'
+GITEA_ADMIN_NAME: 'root'
+GITEA_ADMIN_PASS: 'test'
+GITEA_ADMIN_EMAIL: 'example@example.com'
+GITEA_NETWORK:
+  default:
+    external:
+      name: homelab-network

@@ -1,0 +1,6 @@
+LDAP_SERVER: 'ldap'
+LDAP_OU: 'dc=example,dc=com'
+LDAP_USERS_OU: 'ou=Users'
+LDAP_GROUPS_OU: 'ou=Groups'
+LDAP_USER: 'cn=administrator,cn=users,dc=example,dc=com'
+LDAP_PASS: 'TopS3cr3t'

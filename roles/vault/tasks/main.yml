@@ -1,0 +1,111 @@
+---
+- name: 'Generate certificates for vault'
+  include_role:
+    name: certificate
+  vars:
+    CERT_NAME: '{{ VAULT_NAME }}'
+
+- name: 'Generate container for vault'
+  docker_service:
+    project_name: '{{ VAULT_NAME }}'
+    definition:
+      version: '3.5'
+      networks: '{{ VAULT_NETWORK | default(omit) }}'
+      services:
+       vault:
+        image: 'vault:latest'
+        container_name: '{{ VAULT_NAME }}'
+        command: 'server'
+        ports:
+          - '{{ VAULT_PORT }}:8200' 
+        environment:
+          - 'VAULT_UI=1'
+          - 'VAULT_ADDR=https://{{ VAULT_NAME}}:{{ VAULT_PORT }}/'
+          - 'VAULT_CACERT=/run/secrets/ca.crt'
+          - 'VAULT_LOCAL_CONFIG={{ VAULT_CONFIG | to_json }}'
+        secrets:
+            - 'vault.crt'
+            - 'vault.pem'
+            - 'ca.crt'
+        cap_add:
+          - IPC_LOCK
+        restart: always
+      secrets:
+        vault.crt:
+          file: '{{ VAULT_CERT }}'
+        vault.pem:
+          file: '{{ VAULT_PRIVATEKEY }}'
+        ca.crt:
+          file: '{{ VAULT_CACERT }}'
+      
+- name: 'Wait for Vault to come up'
+  uri:
+    url: 'http://127.0.0.1:{{ VAULT_PORT }}/ui'
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 60
+  delay: 5
+  
+- name: 'Check vault status'
+  uri:
+    url: 'https://127.0.0.1:{{ VAULT_PORT }}/v1/sys/health'
+    return_content: yes
+    validate_certs: no
+    status_code: '200,501,503'
+    body_format: 'json'
+  register: health_result
+
+- name: 'Initialize vault'
+  when: 'not health_result.json.initialized | bool'
+  uri: 
+    url: 'https://127.0.0.1:{{ VAULT_PORT }}/v1/sys/init'
+    method: 'PUT'
+    body: '{ "secret_shares":1, "secret_threshold":1 }'
+    body_format: 'json'
+    return_content: yes
+    status_code: 200
+    validate_certs: no
+  register: init_result
+
+- name: Save token
+  when: not init_result is skipped
+  copy: content="{{ init_result.json.root_token }}" dest=/vagrant/.output/token
+  
+- name: Save key
+  when: not init_result is skipped
+  copy: content="{{ init_result.json.keys_base64[0] }}" dest=/vagrant/.output/key
+
+- name: retrieve key
+  set_fact:
+    vault_key: "{{ lookup('file','/vagrant/.output/key') }}"
+
+- name: retrieve token
+  set_fact:
+    vault_token: "{{ lookup('file','/vagrant/.output/token') }}"
+    
+- name: 'Unseal vault'
+  when: 'health_result.json.sealed | bool'
+  uri:
+    url: 'https://127.0.0.1:{{ VAULT_PORT }}/v1/sys/unseal'
+    method: 'PUT'
+    body: '{ "key":"{{ vault_key }}" }'
+    body_format: 'json'
+    return_content: yes
+    status_code: 200
+    validate_certs: no
+
+- name: 'Check enabled authentication methods'
+  uri:
+    url: 'https://127.0.0.1:{{ VAULT_PORT }}/v1/sys/auth'
+    headers:
+      X-Vault-Token: '{{ vault_token }}'
+    return_content: yes
+    status_code: 200
+    validate_certs: no
+  register: auth_result
+
+- name: 'Enable authentication method'
+  when: "item + '/' not in auth_result.json"
+  command: "docker exec vault vault auth enable {{ item }}"
+  with_items: '{{ VAULT_AUTH_METHODS }}'

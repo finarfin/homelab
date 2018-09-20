@@ -1,0 +1,37 @@
+---
+- name: 'Create container for Gitea'
+  docker_service:
+    project_name: '{{ GITEA_NAME }}'
+    definition:
+      version: '3.5'
+      networks: '{{ GITEA_NETWORK | default(omit) }}'
+      services:
+        gitea:
+          image: 'gitea/gitea'
+          container_name: '{{ GITEA_NAME }}'
+          ports:
+            - '{{ GITEA_HTTP_PORT }}:3000'
+            - '{{ GITEA_SSH_PORT }}:22'
+          environment:
+            - 'DB_TYPE=sqlite3'
+            - 'INSTALL_LOCK=true'
+            - 'DISABLE_REGISTRATION=true'
+            - 'SECRET_KEY=test'
+          volumes:
+            - '{{ GITEA_DATASTORE }}:/data'
+          restart: always                
+         
+- name: 'Wait for Gitea to come up'
+  uri:
+    url: 'http://127.0.0.1:{{ GITEA_HTTP_PORT }}'
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 60
+  delay: 5
+
+- name: 'Create first gitea user'
+  command: 'docker exec gitea gitea admin create-user --name "{{ GITEA_ADMIN_NAME }}" --password "{{ GITEA_ADMIN_PASS }}" --email "{{ GITEA_ADMIN_EMAIL }}" --admin'
+  register: command_result
+  failed_when: 'command_result.rc != 0 and "user already exists" not in command_result.stderr'
+  changed_when: 'command_result.rc == 0'

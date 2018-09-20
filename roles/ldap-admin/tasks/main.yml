@@ -1,0 +1,43 @@
+---
+- name: 'Generate certificates for ldap-admin'
+  include_role:
+    name: certificate
+  vars:
+    CERT_NAME: '{{ LDAP_ADMIN_NAME }}'
+
+- name: 'Install containers'
+  docker_service:
+    project_name: '{{ LDAP_ADMIN_NAME }}'
+    definition:
+      version: '3.5'
+      networks: '{{ LDAP_ADMIN_NETWORK | default(omit) }}'
+      services:
+        ldap-admin:
+          image: 'osixia/phpldapadmin'
+          container_name: '{{ LDAP_ADMIN_NAME }}'
+          command: '--loglevel trace --copy-service'
+          ports:
+            - '{{ LDAP_ADMIN_HTTP }}:80'
+            - '{{ LDAP_ADMIN_HTTPS }}:443'
+          environment:
+            - 'PHPLDAPADMIN_LDAP_HOSTS=#JSON2BASH:{{ LDAP_ADMIN_CONFIG | to_json }}'
+            - 'PHPLDAPADMIN_LDAP_HOSTS_FRIENDLY=false'
+            - 'PHPLDAPADMIN_TRUST_PROXY_SSL=true'
+            - 'PHPLDAPADMIN_HTTPS_CRT_FILENAME=ldap-admin.crt'
+            - 'PHPLDAPADMIN_HTTPS_KEY_FILENAME=ldap-admin.pem'
+            - 'PHPLDAPADMIN_HTTPS_CA_CRT_FILENAME=ca-admin.crt'
+            - 'PHPLDAPADMIN_LDAP_CLIENT_TLS_REQCERT=never'
+            - 'PHPLDAPADMIN_LDAP_CLIENT_TLS=true'
+          secrets:
+            - { source: 'ldap-admin.crt', target: '/container/service/phpldapadmin/assets/apache2/certs/ldap-admin.crt' }
+            - { source: 'ldap-admin.pem', target: '/container/service/phpldapadmin/assets/apache2/certs/ldap-admin.pem' }
+            - { source: 'ca-admin.crt', target: '/container/service/phpldapadmin/assets/apache2/certs/ca-admin.crt' }            
+          restart: 'always'
+      secrets:
+        ldap-admin.crt:
+          file: '{{ LDAP_ADMIN_CRT }}'
+        ldap-admin.pem:
+          file: '{{ LDAP_ADMIN_PRIVATEKEY }}'
+        ca-admin.crt:
+          file: '{{ LDAP_ADMIN_CA }}'
+
