@@ -33,4 +33,4 @@
     - artifactory
     - nexus3
     - gitea
-    - jenkins-master
+    #- jenkins-master WIP
