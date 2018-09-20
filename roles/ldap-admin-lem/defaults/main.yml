@@ -1,7 +1,0 @@
----
-LDAP_ADMIN_NAME: 'ldap-admin'
-LDAP_ADMIN_HTTP: 8083
-LDAP_ADMIN_NETWORK:       
-  default:
-    external:
-      name: homelab-network
