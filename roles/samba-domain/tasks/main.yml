@@ -1,7 +1,7 @@
 ---
 - name: 'Check-out source repository'
   git:
-    repo: 'https://github.com/zanyants/samba-domain'
+    repo: 'https://github.com/finarfin/samba-domain'
     dest: '/tmp/samba-domain'
 
 - name: 'Install containers'
