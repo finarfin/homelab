@@ -29,6 +29,7 @@
             - 'DOMAINPASS={{ SAMBA_ADMIN_PASS }}'
             - 'DNSFORWARDER={{ SAMBA_DNS_FORWARDER }}'
             - 'NOCOMPLEXITY=true'
+            - 'INSECURELDAP=true'
           volumes:
             - '/etc/localtime:/etc/localtime:ro'
             - '{{ SAMBA_DATASTORE }}/data:/var/lib/samba'
