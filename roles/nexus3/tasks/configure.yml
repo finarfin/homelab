@@ -13,18 +13,21 @@
     status_code: 200,401
   register: admin_result
 
-- name: 'Change admin password'
+- name: 'Admin password was already changed'
+  when: 'admin_result.status == 401'
+  set_fact:
+    current_nexus_admin_password: '{{ NEXUS_ADMIN_PASSWORD }}'
+   
+- name: 'Admin password has not been changed'
   when: 'admin_result.status == 200'
-  include_tasks: '{{ NEXUS_ROLE_PATH }}/tasks/admin_password_setup.yml'
-  vars:
-    nexus_admin_password: '{{ NEXUS_ADMIN_PASSWORD }}'
-    current_nexus_admin_password: '{{ NEXUS_INITIAL_ADMIN_PASSWORD }}'
+  set_fact:
+    current_nexus_admin_password: '{{ NEXUS_INITIAL_ADMIN_PASSWORD }}'   
 
 - name: 'Declare groovy scripts'
   uri:
     url: 'http://127.0.0.1:{{ NEXUS_HTTP_PORT }}/service/rest/v1/script'
     user: 'admin'
-    password: '{{ NEXUS_ADMIN_PASSWORD }}'
+    password: '{{ current_nexus_admin_password }}'
     body_format: 'json'
     method: 'POST'
     force_basic_auth: yes
@@ -34,7 +37,13 @@
       type: 'groovy'
       content: '{{ lookup("file", item) }}'
   with_fileglob: '{{ NEXUS_ROLE_PATH }}/files/groovy/*.groovy'
-  
+
+- name: 'Change admin password'
+  when: 'admin_result.status == 200'
+  include_tasks: '{{ NEXUS_ROLE_PATH }}/tasks/admin_password_setup.yml'
+  vars:
+    nexus_admin_password: '{{ NEXUS_ADMIN_PASSWORD }}'
+    
 - set_fact:
     nexus_default_port: '{{ NEXUS_HTTP_PORT }}'
     ldap_connections: 
