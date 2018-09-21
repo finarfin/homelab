@@ -32,10 +32,10 @@
     - { role: 'certificate', CERT_NAME: 'vault' }
     - { role: 'certificate', CERT_NAME: 'artifacts' }
     - { role: 'certificate', CERT_NAME: 'gitea' }
-    - { role: 'nexus3' }
     - { role: 'samba-domain' }
     - { role: 'ldap-admin' }
     - { role: 'sample_ad_data' }
+    - { role: 'nexus3' }
     - { role: 'consul' }
     - { role: 'vault' }
     - { role: 'artifactory' }
