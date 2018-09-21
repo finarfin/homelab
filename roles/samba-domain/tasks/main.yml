@@ -15,9 +15,15 @@
           build: '/tmp/samba-domain'
           image: 'samba-domain'
           container_name: '{{ SAMBA_NAME }}'
+          networks:
+            default:
+              aliases:
+                - '{{ SAMBA_DOMAIN }}'
           ports:
             - '{{ SAMBA_LDAP_PORT }}:389'
             - '{{ SAMBA_LDAPS_PORT }}:636'
+            - '953:53'
+            - '953:53/udp'
           environment:      
             - 'DOMAIN={{ SAMBA_DOMAIN }}'
             - 'DOMAINPASS={{ SAMBA_ADMIN_PASS }}'
