@@ -1,9 +1,42 @@
 ---
 - include_vars: '{{ NEXUS_ROLE_PATH }}/defaults/main.yml'
+  tags: always
 
-- set_fact:  
-    nexus_default_port: '{{ NEXUS_HTTP_PORT }}'
+- name: 'Check admin credentials'     
+  uri:
+    url: 'http://127.0.0.1:{{ NEXUS_HTTP_PORT }}/service/rest/v1/script'
+    user: 'admin'
+    password: '{{ NEXUS_INITIAL_ADMIN_PASSWORD }}'
+    body_format: 'json'
+    method: 'GET'
+    force_basic_auth: yes
+    status_code: 200,401
+  register: admin_result
+
+- name: 'Change admin password'
+  when: 'admin_result.status == 200'
+  include_tasks: '{{ NEXUS_ROLE_PATH }}/tasks/admin_password_setup.yml'
+  vars:
+    nexus_admin_password: '{{ NEXUS_ADMIN_PASSWORD }}'
     current_nexus_admin_password: '{{ NEXUS_INITIAL_ADMIN_PASSWORD }}'
+
+- name: 'Declare groovy scripts'
+  uri:
+    url: 'http://127.0.0.1:{{ NEXUS_HTTP_PORT }}/service/rest/v1/script'
+    user: 'admin'
+    password: '{{ NEXUS_ADMIN_PASSWORD }}'
+    body_format: 'json'
+    method: 'POST'
+    force_basic_auth: yes
+    status_code: 204,500
+    body:
+      name: '{{ item | basename | splitext | first }}'
+      type: 'groovy'
+      content: '{{ lookup("file", item) }}'
+  with_fileglob: '{{ NEXUS_ROLE_PATH }}/files/groovy/*.groovy'
+  
+- set_fact:
+    nexus_default_port: '{{ NEXUS_HTTP_PORT }}'
     ldap_connections: 
       - ldap_name: 'Default'
         ldap_protocol: 'ldaps'
@@ -45,6 +78,7 @@
         privileges: []
         roles: 
           - nx-admin
+  tags: always
 
 - include: '{{ NEXUS_ROLE_PATH }}/tasks/setup_ldap_each.yml'
   with_items: "{{ ldap_connections }}"

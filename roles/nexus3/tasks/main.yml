@@ -48,32 +48,6 @@
 
 - name: 'Get ansible-nexus3-oss role'
   command: 'ansible-galaxy install {{ NEXUS_ROLE_SOURCE }} -p {{ NEXUS_ROLE_PATH | dirname }}'
-  
-- name: 'Check admin credentials'
-  tags: test
-  uri:
-    url: 'http://127.0.0.1:{{ NEXUS_HTTP_PORT }}/service/rest/v1/script'
-    user: 'admin'
-    password: '{{ NEXUS_INITIAL_ADMIN_PASSWORD }}'
-    body_format: 'json'
-    method: 'GET'
-    force_basic_auth: yes
-    status_code: 204
-  register: admin_cred
-  
-- name: 'Declare groovy scripts'
-  uri:
-    url: 'http://127.0.0.1:{{ NEXUS_HTTP_PORT }}/service/rest/v1/script'
-    user: 'admin'
-    password: '{{ NEXUS_INITIAL_ADMIN_PASSWORD }}'
-    body_format: 'json'
-    method: 'POST'
-    force_basic_auth: yes
-    status_code: 204,500
-    body:
-      name: '{{ item | basename | splitext | first }}'
-      type: 'groovy'
-      content: '{{ lookup("file", item) }}'
-  with_fileglob: '{{ NEXUS_ROLE_PATH }}/files/groovy/*.groovy'
 
 - include_tasks: configure.yml
+  tags: test
