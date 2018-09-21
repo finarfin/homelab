@@ -1,10 +1,4 @@
 ---
-- name: 'Generate certificates for ldaps'
-  include_role:
-    name: certificate
-  vars:
-    CERT_NAME: '{{ SAMBA_NAME }}'
-
 - name: 'Check-out source repository'
   git:
     repo: 'https://github.com/zanyants/samba-domain'

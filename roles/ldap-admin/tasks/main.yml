@@ -1,10 +1,4 @@
 ---
-- name: 'Generate certificates for ldap-admin'
-  include_role:
-    name: certificate
-  vars:
-    CERT_NAME: '{{ LDAP_ADMIN_NAME }}'
-
 - name: 'Install containers'
   docker_service:
     project_name: '{{ LDAP_ADMIN_NAME }}'

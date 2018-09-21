@@ -25,12 +25,19 @@
           subnet: '172.18.0.0/16'
           gateway: '172.18.0.1'        
   roles:
-    - samba-domain
-    - ldap-admin
-    - sample_ad_data
-    - consul
-    - vault
-    - artifactory
-    - nexus3
-    - gitea
+    - { role: 'certificate', CERT_NAME: 'nexus' }
+    - { role: 'certificate', CERT_NAME: 'ldap' }
+    - { role: 'certificate', CERT_NAME: 'ldap-admin' }
+    - { role: 'certificate', CERT_NAME: 'consul' }
+    - { role: 'certificate', CERT_NAME: 'vault' }
+    - { role: 'certificate', CERT_NAME: 'artifacts' }
+    - { role: 'certificate', CERT_NAME: 'gitea' }
+    - { role: 'nexus3' }
+    - { role: 'samba-domain' }
+    - { role: 'ldap-admin' }
+    - { role: 'sample_ad_data' }
+    - { role: 'consul' }
+    - { role: 'vault' }
+    - { role: 'artifactory' }
+    - { role: 'gitea' }
     #- jenkins-master WIP

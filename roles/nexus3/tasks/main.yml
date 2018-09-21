@@ -1,10 +1,4 @@
 ---
-- name: 'Generate certificates for nexus'
-  include_role:
-    name: certificate
-  vars:
-    CERT_NAME: '{{ NEXUS_NAME }}'
-
 - name: 'Install containers'
   docker_service:
     project_name: '{{ NEXUS_NAME }}'
