@@ -44,4 +44,3 @@
   command: 'ansible-galaxy install {{ NEXUS_ROLE_SOURCE }} -p {{ NEXUS_ROLE_PATH | dirname }}'
 
 - include_tasks: configure.yml
-  tags: test
