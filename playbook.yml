@@ -72,24 +72,31 @@
       CERT_NAME: 'nexus'
       CERT_PATH: '{{ NEXUS_CRT }}'
       CERT_PRIVATEKEY: '{{ NEXUS_PRIVATEKEY }}'
+      
     - role: certificate
       CERT_NAME: 'ldap'
       CERT_PATH: '{{ SAMBA_CRT }}'
       CERT_PRIVATEKEY: '{{ SAMBA_PRIVATEKEY }}'
+
     - role: certificate
       CERT_NAME: 'ldap-admin'
       CERT_PATH: '{{ LDAP_ADMIN_CRT }}'
       CERT_PRIVATEKEY: '{{ LDAP_ADMIN_PRIVATEKEY }}'
+      
     - role: certificate
-      CERT_NAME: 'consul'        
+      CERT_NAME: 'consul'
+
     - role: certificate
       CERT_NAME: 'vault'
       CERT_PATH: '{{ VAULT_CERT }}'
-      CERT_PRIVATEKEY: '{{ VAULT_PRIVATEKEY }}'             
+      CERT_PRIVATEKEY: '{{ VAULT_PRIVATEKEY }}'
+
     - role: certificate
-      CERT_NAME: 'artifacts'        
+      CERT_NAME: 'artifacts'
+
     - role: certificate
       CERT_NAME: 'gitea'
+
     - { role: 'samba-domain' }
     - { role: 'ldap-admin' }
     - { role: 'sample_ad_data' }
