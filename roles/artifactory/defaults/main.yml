@@ -2,3 +2,20 @@
 ARTIFACTORY_NAME: 'artifactory'
 ARTIFACTORY_PORT: 8081
 ARTIFACTORY_DATASTORE: '/data/artifactory'
+
+ARTIFACTORY_CONFIG:
+  security:
+    ldapSettings:
+      ldap:
+        emailAttribute: 'mail'
+        ldapPoisoningProtection: true
+        ldapUrl: '{{ ARTIFACTORY_LDAP_URL }}'
+        search:
+          managerDn: '{{ ARTIFACTORY_LDAP_USER }}'
+          managerPassword: '{{ ARTIFACTORY_LDAP_PASSWORD }}'
+          searchFilter: '(&(objectclass=user)(sAMAccountName={0}))'
+          searchSubTree: true
+        userDnPattern: 'cn={0},ou=Users,dc=example,dc=com'
+        allowUserToAccessProfile: false
+        autoCreateUser: true
+        enabled: true 

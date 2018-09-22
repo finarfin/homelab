@@ -78,3 +78,16 @@
     force_basic_auth: true
     user: 'admin'
     password: '{{ ARTIFACTORY_PASSWORD }}'
+    
+- name: 'Initial system configuration'
+  uri:
+    url: 'http://127.0.0.1:{{ ARTIFACTORY_PORT }}/artifactory/api/system/configuration'
+    method: 'PATCH'
+    body: '{{ ARTIFACTORY_CONFIG | to_yaml }}'
+    headers:
+      Content-Type: 'application/yaml'
+    status_code: 200
+    return_content: yes
+    force_basic_auth: true
+    user: 'admin'
+    password: '{{ ARTIFACTORY_PASSWORD }}'
