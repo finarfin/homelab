@@ -1,4 +1,12 @@
 ---
+- name: 'Configure datastore'
+  file: 
+    dest: '{{ ARTIFACTORY_DATASTORE }}'
+    owner: 1030
+    group: 'root'
+    mode: 0775
+    recurse: yes
+
 - name: 'Create container for Artifactory'
   docker_service:
     project_name: '{{ ARTIFACTORY_NAME }}'
