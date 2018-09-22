@@ -105,7 +105,16 @@
     validate_certs: no
   register: auth_result
 
-- name: 'Enable authentication method'
+- name: 'Enable authentication methods'
   when: "item + '/' not in auth_result.json"
-  command: "docker exec vault vault auth enable {{ item }}"
+  uri:
+    url: 'https://127.0.0.1:{{ VAULT_PORT }}/v1/sys/auth/{{ item }}'
+    method: 'POST'
+    body:
+      type: '{{ item }}'
+    body_format: 'json'
+    headers:
+      X-Vault-Token: '{{ vault_token }}'
+    status_code: 204
+    validate_certs: no
   with_items: '{{ VAULT_AUTH_METHODS }}'
