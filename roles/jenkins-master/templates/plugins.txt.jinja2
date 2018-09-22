@@ -1,0 +1,14 @@
+git
+workflow-aggregator
+build-pipeline-plugin
+pipeline-stage-view
+artifactory
+gitea:latest
+configuration-as-code:latest
+configuration-as-code-support:latest
+job-dsl:latest
+ldap:latest
+matrix-auth:latest
+{% for item in JENKINS_ADDITIONAL_PLUGINS | default([]) %}
+{{ item }}
+{% endfor %}

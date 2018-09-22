@@ -1,0 +1,107 @@
+---
+- set_fact:
+    vault_token: '{{ lookup("file", "/vagrant/.output/token") }}'
+
+- name: 'Create vault policy'
+  uri:
+    url: 'https://127.0.0.1:8200/v1/sys/policy/{{ JENKINS_NAME }}'
+    method: 'POST'
+    headers:
+      X-Vault-Token: '{{ vault_token }}'
+    body: 
+      policy: 'path "secret/jenkins/{{ JENKINS_ORGANIZATION }}" { capabilities = ["read"] }'
+    body_format: 'json'
+    status_code: 204
+    validate_certs: no    
+    
+- name: 'Create vault token'
+  uri:
+    url: 'https://127.0.0.1:8200/v1/auth/token/create'
+    method: 'POST'
+    headers:
+      X-Vault-Token: '{{ vault_token }}'
+    body: 
+      policies: ['{{ JENKINS_NAME }}']
+      renewable: false
+      ttl: '1h'
+      display_name: '{{ JENKINS_NAME }}'
+    body_format: 'json'
+    status_code: 200
+    validate_certs: no   
+    return_content: yes
+  register: token_result
+    
+- name: 'Create vault token'
+  uri:
+    url: 'https://127.0.0.1:8200/v1/secret/jenkins/{{ JENKINS_ORGANIZATION }}'
+    method: 'POST'
+    headers:
+      X-Vault-Token: '{{ vault_token }}'
+    body: 
+      LDAP_USER: administrator
+      LDAP_PASSWORD: TopS3cr3t
+      ARTIFACTORY_USER: can
+      ARTIFACTORY_PASSWORD: test
+      GITEA_USER: can
+      GITEA_PASSWORD: test
+    body_format: 'json'
+    status_code: 204
+    validate_certs: no
+    return_content: yes
+
+- name: 'Create dockerfile source'
+  file:
+    path: '{{ JENKINS_BUILD_PATH }}'
+    state: 'directory'
+
+- name: 'Copy CA certificate'
+  copy:
+    src: '/etc/ssl/crt/ca.crt'
+    dest: '{{ JENKINS_BUILD_PATH }}/'
+    
+- name: 'Copy dockerfile'
+  copy:
+    src: 'files/Dockerfile'
+    dest: '{{ JENKINS_BUILD_PATH }}/'
+    
+- name: 'Create config.yml'
+  template:
+    src: 'templates/config.yml.jinja2'
+    dest: '{{ JENKINS_BUILD_PATH }}/config.yml'
+    
+- name: 'Create plugins.txt'
+  template:
+    src: 'templates/plugins.txt.jinja2'
+    dest: '{{ JENKINS_BUILD_PATH }}/plugins.txt'
+   
+- name: 'Install containers'
+  docker_service:
+    project_name: '{{ JENKINS_NAME }}'
+    build: yes
+    definition:
+      version: '3.5'
+      networks: '{{ JENKINS_NETWORK | default(omit) }}'
+      services:
+        jenkins-master:
+          build: '{{ JENKINS_BUILD_PATH }}'
+          image: '{{ JENKINS_NAME }}'
+          container_name: '{{ JENKINS_NAME }}'
+          ports:
+            - '{{ JENKINS_HTTP_PORT }}:8080'
+            - '{{ JENKINS_SLAVE_PORT }}:50000'
+          volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock"
+            - "/mnt/host_files/.output:/certs"
+          environment:
+            - "DOCKER_REGISTRY_URL=https://nexus:9082/v2/"
+            - "CASC_VAULT_TOKEN={{ token_result.json.auth.client_token }}"
+            - "CASC_VAULT_PATH=secret/jenkins/{{ JENKINS_ORGANIZATION }}"
+            - "CASC_VAULT_URL=https://vault:8200" 
+            - "JAVA_OPTS=-Djava.util.logging.loglevel=FINE"
+          dns:
+            - 'ldap'
+          restart: always
+  register: result
+  
+- debug:
+    var: result

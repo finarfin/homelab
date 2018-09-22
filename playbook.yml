@@ -40,4 +40,4 @@
     - { role: 'vault' }
     - { role: 'artifactory' }
     - { role: 'gitea' }
-    #- jenkins-master WIP
+    - { role: 'jenkins-master' }
