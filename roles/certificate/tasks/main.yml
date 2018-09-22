@@ -8,11 +8,11 @@
     path: '{{ item }}'
     state: 'directory'
   with_items:
-    - '{{ CA_CERT | basename }}'
-    - '{{ CA_PRIVATEKEY | basename }}'
-    - '{{ CERT_PRIVATEKEY | basename }}'
-    - '{{ CERT_CSR | basename }}'
-    - '{{ CERT_PATH | basename }}'
+    - '{{ CA_CERT | dirname }}'
+    - '{{ CA_PRIVATEKEY | dirname }}'
+    - '{{ CERT_PRIVATEKEY | dirname }}'
+    - '{{ CERT_CSR | dirname }}'
+    - '{{ CERT_PATH | dirname }}'
 
 - name: 'Generate CA certificate'
   command: 'openssl req -new -newkey rsa:{{ CA_KEYSIZE | int }} -days {{ CA_VALIDITY | int }} -nodes -x509 -subj "{{ CA_SUBJECT }}" -keyout {{ CA_PRIVATEKEY }} -out {{ CA_CERT }}'
