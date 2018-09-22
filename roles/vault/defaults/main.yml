@@ -1,16 +1,12 @@
 ---
 VAULT_NAME: 'vault'
-VAULT_NETWORK:
-    default:
-      external:
-        name: homelab-network
 VAULT_PORT: 8200
 VAULT_CACERT: '/etc/ssl/crt/ca.crt'
-VAULT_CERT: '/etc/ssl/crt/vault.crt'
-VAULT_PRIVATEKEY: '/etc/ssl/private/vault.pem'
+VAULT_CERT: '/etc/ssl/crt/{{ VAULT_NAME }}.crt'
+VAULT_PRIVATEKEY: '/etc/ssl/private/{{ VAULT_NAME }}.pem'
 VAULT_CONSUL_ADDR: 'consul:8500'
 VAULT_CONSUL_ADVERTISE_ADDR: 'http://consul:8300'
-VAULT_CONSUL_PATH: 'vault/'
+VAULT_CONSUL_PATH: '{{ VAULT_NAME }}/'
 VAULT_CONFIG:
   backend: 
     consul:

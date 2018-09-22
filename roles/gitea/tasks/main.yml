@@ -31,6 +31,7 @@
   delay: 5
 
 - name: 'Create first gitea user'
+  when: 'GITEA_ADMIN_PASS is defined'
   command: 'docker exec gitea gitea admin create-user --name "{{ GITEA_ADMIN_NAME }}" --password "{{ GITEA_ADMIN_PASS }}" --email "{{ GITEA_ADMIN_EMAIL }}" --admin'
   register: command_result
   failed_when: 'command_result.rc != 0 and "user already exists" not in command_result.stderr'

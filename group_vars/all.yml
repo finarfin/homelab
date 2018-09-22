@@ -1,0 +1,71 @@
+COMMON_NETWORK: 
+  default:
+    external:
+      name: homelab-network
+      
+ARTIFACTORY_PORT: 8090
+ARTIFACTORY_NETWORK: '{{ COMMON_NETWORK }}'
+
+CONSUL_NETWORK: '{{ COMMON_NETWORK }}'
+CONSUL_SERVER: 8300
+CONSUL_SERF_LAN: 8301
+CONSUL_SERF_WAN: 8302
+CONSUL_HTTP: 8500
+CONSUL_DNS: 8600
+
+GITEA_NETWORK: '{{ COMMON_NETWORK }}'
+GITEA_HTTP_PORT: 3000
+GITEA_SSH_PORT: 10022
+GITEA_ADMIN_NAME: 'root'
+GITEA_ADMIN_PASS: 'test'
+GITEA_ADMIN_EMAIL: 'example@example.com'
+
+JENKINS_NETWORK: '{{ COMMON_NETWORK }}'
+JENKINS_HTTP_PORT: 8080
+JENKINS_SLAVE_PORT: 50000
+
+LDAP_ADMIN_NETWORK: '{{ COMMON_NETWORK }}'
+LDAP_ADMIN_HTTP: 8083
+LDAP_ADMIN_HTTPS: 8084
+LDAP_ADMIN_CRT: '/etc/ssl/crt/{{ LDAP_ADMIN_NAME }}.crt'
+LDAP_ADMIN_PRIVATEKEY: '/etc/ssl/private/{{ LDAP_ADMIN_NAME }}.pem'
+LDAP_ADMIN_CA: '/etc/ssl/crt/ca.crt'
+LDAP_ADMIN_PASSWORD: 'TopS3cr3t'
+LDAP_ADMIN_CONFIG:       
+  - 'ldap':
+    - server:
+      - tls: true
+    - login:
+      - bind_id: 'cn=administrator,cn=users,dc=example,dc=com'
+      - bind_pass: '{{ LDAP_ADMIN_PASSWORD }}'
+           
+NEXUS_NETWORK: '{{ COMMON_NETWORK }}'
+NEXUS_HTTP_PORT: 8081
+NEXUS_HTTPS_PORT: 8443
+NEXUS_DOCKER_PORT: 9082
+NEXUS_ADMIN_PASSWORD: 'test'
+NEXUS_LDAP_SERVER: 'ldap'
+NEXUS_LDAP_OU: 'dc=example,dc=com'
+NEXUS_LDAP_USERS_OU: 'ou=Users'
+NEXUS_LDAP_GROUPS_OU: 'ou=Groups'
+NEXUS_LDAP_USER: 'cn=administrator,cn=users,dc=example,dc=com'
+NEXUS_LDAP_PASS: 'TopS3cr3t'
+NEXUS_CRT: '/etc/ssl/crt/{{ NEXUS_NAME }}.crt'
+NEXUS_PRIVATEKEY: '/etc/ssl/private/{{ NEXUS_NAME }}.pem'
+NEXUS_CA: '/etc/ssl/crt/ca.crt'
+
+SAMBA_NETWORK: '{{ COMMON_NETWORK }}'
+SAMBA_LDAP_PORT: 389
+SAMBA_LDAPS_PORT: 636
+SAMBA_ADMIN_PASS: 'TopS3cr3t'
+SAMBA_CRT: '/etc/ssl/crt/{{ SAMBA_NAME }}.crt'
+SAMBA_PRIVATEKEY: '/etc/ssl/private/{{ SAMBA_NAME }}.pem'
+SAMBA_CA: '/etc/ssl/crt/ca.crt'
+
+VAULT_NETWORK: '{{ COMMON_NETWORK }}'
+VAULT_PORT: 8200
+VAULT_CACERT: '/etc/ssl/crt/ca.crt'
+VAULT_CERT: '/etc/ssl/crt/vault.crt'
+VAULT_PRIVATEKEY: '/etc/ssl/private/vault.pem'
+VAULT_CONSUL_ADDR: 'consul:8500'
+VAULT_CONSUL_ADVERTISE_ADDR: 'http://consul:8300'

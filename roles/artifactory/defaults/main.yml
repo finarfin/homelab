@@ -2,7 +2,3 @@
 ARTIFACTORY_NAME: 'artifactory'
 ARTIFACTORY_PORT: 8081
 ARTIFACTORY_DATASTORE: '/data/artifactory'
-ARTIFACTORY_NETWORK:
-  default:
-    external:
-      name: homelab-network

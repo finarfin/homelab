@@ -1,13 +1,8 @@
 ---
 SAMBA_NAME: 'ldap'
-SAMBA_NETWORK:       
-  default:
-    external:
-      name: homelab-network
 SAMBA_LDAP_PORT: 389
 SAMBA_LDAPS_PORT: 636
 SAMBA_DOMAIN: 'example.com'
-SAMBA_ADMIN_PASS: 'TopS3cr3t'
 SAMBA_DNS_FORWARDER: '8.8.8.8'
 SAMBA_DATASTORE: '/data/samba'
 SAMBA_CRT: '/etc/ssl/crt/{{ SAMBA_NAME }}.crt'

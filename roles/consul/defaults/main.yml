@@ -1,12 +1,9 @@
 ---
 CONSUL_NAME: 'consul'
-CONSUL_NETWORK:
-    default:
-      external:
-        name: homelab-network
+
 CONSUL_SERVER: 8300
 CONSUL_SERF_LAN: 8301
-CONSUL_SERF_WAN: 8302
+CONSUL_SERF_WAN: 802
 CONSUL_HTTP: 8500
 CONSUL_DNS: 8600
 CONSUL_DATASTORE: '/data/consul'
