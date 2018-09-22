@@ -15,6 +15,7 @@
           build: '/tmp/samba-domain'
           image: 'samba-domain'
           container_name: '{{ SAMBA_NAME }}'
+          privileged: true
           networks:
             default:
               aliases:
