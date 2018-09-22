@@ -6,13 +6,13 @@
       parted:
         device: /dev/sdc
         flags: [ lvm ]
-        number: '{{ item.0 + 1 }}'
-        part_start: '{{ item.1.start }}'
-        part_end: '{{ item.1.end }}'
+        number: '2'
+        part_start: '{{ item.start }}'
+        part_end: '{{ item.end }}'
         state: present
-      with_indexed_items:
-        - { start: '0GiB', end: '10GiB' }
-        - { start: '10GiB', end: '{{ omit }}' }
+      with_items:
+        - { start: '0%', end: '10GiB' }
+        - { start: '10GiB', end: '100%' }
           
     - name: 'Format new partitions as ext4'
       filesystem:
