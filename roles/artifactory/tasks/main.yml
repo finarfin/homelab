@@ -7,6 +7,19 @@
     mode: 0775
     recurse: yes
 
+- name: 'Create etc folder'
+  file: 
+    path: '{{ ARTIFACTORY_DATASTORE }}/etc'
+    owner: 1030
+    group: 'root'
+    mode: 0777    
+    state: 'directory'
+    
+- name: 'Create inital configuration file'
+  template: 
+    src: 'templates/artifactory.config.import.yml.jinja2'
+    dest: '{{ ARTIFACTORY_DATASTORE }}/etc/artifactory.config.import.yml'   
+    
 - name: 'Create container for Artifactory'
   docker_service:
     project_name: '{{ ARTIFACTORY_NAME }}'
@@ -30,7 +43,7 @@
 
 - name: 'Wait for Artifactory to come up'
   uri:
-    url: 'http://127.0.0.1:{{ ARTIFACTORY_PORT }}'
+    url: 'http://127.0.0.1:{{ ARTIFACTORY_PORT }}/artifactory/api/system/ping'
     status_code: 200
   register: result
   until: result.status == 200
@@ -50,3 +63,18 @@
     status_code: 200, 400
   register: result
   changed_when: 'result.status == 200'
+  
+- name: 'Create default repos'
+  uri:
+    url: 'http://127.0.0.1:{{ ARTIFACTORY_PORT }}/artifactory/ui/onboarding/createDefaultRepos'
+    method: 'POST'
+    body:
+      repoTypeList:
+        - Generic
+      fromOnboarding: true
+    body_format: 'json'
+    status_code: 201
+    return_content: yes
+    force_basic_auth: true
+    user: 'admin'
+    password: '{{ ARTIFACTORY_PASSWORD }}'
