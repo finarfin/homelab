@@ -33,7 +33,7 @@
       name: '{{ item }}'
       samaccountname: '{{ item }}'
       useraccountcontrol: 512
-      unicodePwd: '{{ "T3st123!" | utf16encode }}'
+      unicodePwd: '{{ "T3st123!" | unicodepwd }}'
   with_items:
     - developer1
     - developer2
