@@ -2,18 +2,61 @@
   connection: local
   become: yes
   pre_tasks:
+    - name: 'Create additional disk'
+      parted:
+        device: /dev/sdc
+        flags: [ lvm ]
+        number: '{{ item.0 + 1 }}'
+        part_start: '{{ item.1.start }}'
+        part_end: '{{ item.1.end }}'
+        state: present
+      with_indexed_items:
+        - { start: '0GiB', end: '10GiB' }
+        - { start: '10GiB', end: '{{ omit }}' }
+          
+    - name: 'Format new partitions as ext4'
+      filesystem:
+        fstype: 'ext4'
+        dev: '{{ item }}'
+      with_items:
+        - '/dev/sdc1'
+        - '/dev/sdc2'
+          
+    - name: 'Mount the new partitions'
+      mount:
+        fstype: 'ext4'
+        src: '{{ item.src }}'
+        path: '{{ item.dest }}'
+        state: 'mounted'
+      with_items:
+        - { src: '/dev/sdc1', dest: '/data' }
+        - { src: '/dev/sdc2', dest: '/mnt/docker' }
+    
+    - name: 'Configure docker daemon'
+      copy:
+        content: '{ "data-root": "/mnt/docker" }'
+        dest: '/etc/docker/daemon.json'
+        owner: 'root'
+        group: 'root'
+        mode: '0644'
+      register: docker_cfg
+       
+    - name: 'Restart docker deamon'
+      when: 'docker_cfg is changed'
+      service: 
+        name: 'docker'
+        state: 'restarted'
+  
     - name: 'Update all packages'
       apt:
         update_cache: yes
         upgrade: dist
 
     - name: 'Install python and pip'
-      tags: test
       apt:
         name: 'python-pip,libsasl2-dev,python-dev,libldap2-dev,libssl-dev'
         
     - name: 'Install python dependencies'
-      tags: test
       pip:
         name: 'docker,docker-compose,python-ldap'
 

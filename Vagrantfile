@@ -13,7 +13,7 @@ Vagrant.configure("2") do |config|
     
     vdisk_name = ".vagrant/#{node_name}.vdi"
     unless File.exist?(vdisk_name)
-       vbox.customize ['createhd', '--filename', vdisk_name, '--size', "#{10*1024}"]
+       vbox.customize ['createhd', '--filename', vdisk_name, '--size', "#{30*1024}"]
     end
     vbox.customize ['storageattach', :id, '--storagectl', "SCSI", '--port', 2, '--device', 0, '--type', 'hdd', '--medium', vdisk_name]        
   end   
