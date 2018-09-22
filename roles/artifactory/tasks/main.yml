@@ -27,3 +27,26 @@
             nofile:
               soft: 32000
               hard: 40000               
+
+- name: 'Wait for Artifactory to come up'
+  uri:
+    url: 'http://127.0.0.1:{{ ARTIFACTORY_PORT }}'
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 60
+  delay: 5
+  
+- name: 'Change admin password'
+  uri:
+    url: 'http://127.0.0.1:{{ ARTIFACTORY_PORT }}/artifactory/api/security/users/authorization/changePassword'
+    method: 'POST'
+    body:
+      userName: 'admin'
+      oldPassword: 'password'
+      newPassword1: '{{ ARTIFACTORY_PASSWORD }}'
+      newPassword2: '{{ ARTIFACTORY_PASSWORD }}'
+    body_format: 'json'   
+    status_code: 200, 400
+  register: result
+  changed_when: 'result.status == 200'
