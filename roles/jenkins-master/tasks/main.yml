@@ -1,6 +1,6 @@
 ---
 - set_fact:
-    vault_token: '{{ lookup("file", "/vagrant/.output/token") }}'
+    vault_token: '{{ lookup("file", "/data/secrets/token") }}'
 
 - name: 'Create vault policy'
   uri:
@@ -56,7 +56,7 @@
 
 - name: 'Copy CA certificate'
   copy:
-    src: '/etc/ssl/crt/ca.crt'
+    src: '{{ JENKINS_CA_CERT }}'
     dest: '{{ JENKINS_BUILD_PATH }}/'
     
 - name: 'Copy dockerfile'
@@ -91,7 +91,7 @@
             - '{{ JENKINS_SLAVE_PORT }}:50000'
           volumes:
             - "/var/run/docker.sock:/var/run/docker.sock"
-            - "/mnt/host_files/.output:/certs"
+            - "/data/secrets:/certs"
           environment:
             - "DOCKER_REGISTRY_URL=https://nexus:9082/v2/"
             - "CASC_VAULT_TOKEN={{ token_result.json.auth.client_token }}"
