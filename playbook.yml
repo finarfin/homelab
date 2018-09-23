@@ -97,12 +97,13 @@
     - role: certificate
       CERT_NAME: 'gitea'
 
-    - { role: 'samba-domain' }
-    - { role: 'ldap-admin' }
-    - { role: 'sample_ad_data' }
-    - { role: 'nexus3' }
-    - { role: 'consul' }
-    - { role: 'vault' }
-    - { role: 'artifactory' }
-    - { role: 'gitea' }
-    - { role: 'jenkins-master' }
+    - role: 'samba-domain'
+    - role: 'ldap-admin'
+    - role: 'sample_ad_data'
+    - role: 'nexus3'
+    - role: 'consul'
+    - role: 'vault'
+    - role: 'artifactory'
+    - role: 'gitea'
+    - role: 'jenkins-master'
+    - role: 'rundeck'

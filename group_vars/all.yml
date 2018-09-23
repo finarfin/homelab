@@ -78,3 +78,14 @@ VAULT_CERT: '{{ COMMON_CERT_BASE }}/vault.crt'
 VAULT_PRIVATEKEY: '{{ COMMON_CERT_BASE }}//vault.pem'
 VAULT_CONSUL_ADDR: 'consul:8500'
 VAULT_CONSUL_ADVERTISE_ADDR: 'http://consul:8300'
+
+RUNDECK_NETWORK: '{{ COMMON_NETWORK }}'
+RUNDECK_PORT: '4440'
+RUNDECK_LDAP_URL: 'ldap://ldap:389'
+RUNDECK_LDAP_USER: 'cn=Administrator,cn=Users,dc=example,dc=com'
+RUNDECK_LDAP_PASSWORD: '{{ SAMBA_ADMIN_PASS }}'
+RUNDECK_LDAP_USERS_DN: 'ou=Users,dc=example,dc=com'
+RUNDECK_LDAP_ROLES_DN: 'ou=Groups,dc=example,dc=com'
+RUNDECK_PLUGINS:
+  - https://github.com/rundeck-plugins/vault-storage/releases/download/1.1.0/vault-storage-1.1.0.jar
+  - https://github.com/theque5t/rundeck-diy-webhook-notification/raw/master/build/libs/rundeck-diy-webhook-notification-1.0.0.jar

@@ -1,0 +1,51 @@
+---
+- name: 'Create dockerfile source'
+  file:
+    path: '{{ RUNDECK_BUILD_PATH }}'
+    state: 'directory'
+
+- name: 'Copy dockerfile'
+  template:
+    src: 'templates/Dockerfile'
+    dest: '{{ RUNDECK_BUILD_PATH }}/Dockerfile'
+    
+- name: 'Configure datastore'
+  file: 
+    dest: '{{ RUNDECK_DATASTORE }}'
+    mode: 0777
+    recurse: yes
+        
+- name: 'Create container for Rundeck'
+  docker_service:
+    project_name: '{{ RUNDECK_NAME }}'
+    build: yes
+    definition:    
+      version: '3.5'
+      networks: '{{ RUNDECK_NETWORK | default(omit) }}'
+      services:
+        rundeck:
+          build: '{{ RUNDECK_BUILD_PATH }}'
+          image: '{{ RUNDECK_NAME }}'
+          container_name: '{{ RUNDECK_NAME }}'
+          ports:
+           - '{{ RUNDECK_PORT }}:4440'
+          volumes:
+           - '{{ RUNDECK_DATASTORE }}:/home/rundeck/server/data'
+          environment:
+            RUNDECK_JAAS_MODULES_0: JettyCombinedLdapLoginModule
+            RUNDECK_JAAS_LDAP_PROVIDERURL: '{{ RUNDECK_LDAP_URL }}'
+            RUNDECK_JAAS_LDAP_BINDDN: '{{ RUNDECK_LDAP_USER }}'
+            RUNDECK_JAAS_LDAP_BINDPASSWORD: '{{ RUNDECK_LDAP_PASSWORD }}'
+            RUNDECK_JAAS_LDAP_USERBASEDN: '{{ RUNDECK_LDAP_USERS_DN }}'
+            RUNDECK_JAAS_LDAP_ROLEBASEDN: '{{ RUNDECK_LDAP_ROLES_DN }}'
+          restart: always        
+
+- name: 'Wait for Rundeck to come up'
+  uri:
+    url: 'http://127.0.0.1:{{ RUNDECK_PORT }}'
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 60
+  delay: 5
+  

@@ -57,6 +57,7 @@
       cn: '{{ item.name }}'
       uniquemember: '{{ item.members | default("") }}' 
   with_items:
+    - { name: 'admin', members: ['cn=engineer1,{{ LDAP_USERS_OU }},{{ LDAP_OU }}', 'cn=engineer2,{{ LDAP_USERS_OU }},{{ LDAP_OU }}'] }
     - { name: 'Engineers', members: ['cn=engineer1,{{ LDAP_USERS_OU }},{{ LDAP_OU }}', 'cn=engineer2,{{ LDAP_USERS_OU }},{{ LDAP_OU }}'] }
     - { name: 'Developers', members: ['cn=developer1,{{ LDAP_USERS_OU }},{{ LDAP_OU }}', 'cn=developer2,{{ LDAP_USERS_OU }},{{ LDAP_OU }}'] }
     - { name: 'Operations', members: ['cn=operator1,{{ LDAP_USERS_OU }},{{ LDAP_OU }}', 'cn=operator2,{{ LDAP_USERS_OU }},{{ LDAP_OU }}'] }
