@@ -38,3 +38,8 @@
 - name: 'Bundle certificate'
   when: 'cert_result is changed'
   shell: 'cat {{ CA_CERT }} >> {{ CERT_PATH }}'
+  
+- name: 'Configure permissions for private key'
+  file: 
+    dest: '{{ CERT_PRIVATEKEY }}'
+    mode: 0644
