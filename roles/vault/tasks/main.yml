@@ -1,4 +1,9 @@
 ---
+- name: 'Configure owner for private key'
+  file:
+    path: '{{ VAULT_PRIVATEKEY }}'
+    owner: 100
+
 - name: 'Generate container for vault'
   docker_service:
     project_name: '{{ VAULT_NAME }}'
