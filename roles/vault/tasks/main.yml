@@ -69,19 +69,23 @@
 
 - name: Save token
   when: not init_result is skipped
-  copy: content="{{ init_result.json.root_token }}" dest=/vagrant/.output/token
+  copy: 
+    content: '{{ init_result.json.root_token }}'
+    dest: '/data/secrets/token'
   
 - name: Save key
   when: not init_result is skipped
-  copy: content="{{ init_result.json.keys_base64[0] }}" dest=/vagrant/.output/key
+  copy: 
+    content: '{{ init_result.json.keys_base64[0] }}'
+    dest: '/data/secrets/key'
 
 - name: retrieve key
   set_fact:
-    vault_key: "{{ lookup('file','/vagrant/.output/key') }}"
+    vault_key: "{{ lookup('file','/data/secrets/key') }}"
 
 - name: retrieve token
   set_fact:
-    vault_token: "{{ lookup('file','/vagrant/.output/token') }}"
+    vault_token: "{{ lookup('file','/data/secrets/token') }}"
     
 - name: 'Unseal vault'
   when: 'health_result.json.sealed | bool'
