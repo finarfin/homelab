@@ -7,7 +7,7 @@ Vagrant.configure("2") do |config|
   config.vbguest.auto_update = false
   config.vm.provider 'virtualbox' do |vbox|
     vbox.name = node_name
-    vbox.memory = 4096
+    vbox.memory = 8192
     vbox.cpus = 4
     vbox.customize ["modifyvm", :id, "--uartmode1", "disconnected"]
     
