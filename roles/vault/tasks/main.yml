@@ -1,10 +1,4 @@
 ---
-- name: 'Generate certificates for vault'
-  include_role:
-    name: certificate
-  vars:
-    CERT_NAME: '{{ VAULT_NAME }}'
-
 - name: 'Generate container for vault'
   docker_service:
     project_name: '{{ VAULT_NAME }}'
