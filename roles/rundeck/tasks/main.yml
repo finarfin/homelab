@@ -9,12 +9,17 @@
     src: 'templates/Dockerfile'
     dest: '{{ RUNDECK_BUILD_PATH }}/Dockerfile'
     
+- name: 'Create token.properties'
+  template:
+    src: 'templates/tokens.properties.j2'
+    dest: '{{ RUNDECK_TOKEN_FILE }}'
+  
 - name: 'Configure datastore'
   file: 
     dest: '{{ RUNDECK_DATASTORE }}'
     mode: 0777
     recurse: yes
-        
+            
 - name: 'Create container for Rundeck'
   docker_service:
     project_name: '{{ RUNDECK_NAME }}'
@@ -38,7 +43,12 @@
             RUNDECK_JAAS_LDAP_BINDPASSWORD: '{{ RUNDECK_LDAP_PASSWORD }}'
             RUNDECK_JAAS_LDAP_USERBASEDN: '{{ RUNDECK_LDAP_USERS_DN }}'
             RUNDECK_JAAS_LDAP_ROLEBASEDN: '{{ RUNDECK_LDAP_ROLES_DN }}'
-          restart: always        
+          secrets:
+            - 'tokens.properties'
+          restart: always
+      secrets:
+        tokens.properties:
+          file: '{{ RUNDECK_TOKEN_FILE }}'          
 
 - name: 'Wait for Rundeck to come up'
   uri:

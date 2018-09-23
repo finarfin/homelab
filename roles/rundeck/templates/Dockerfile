@@ -12,7 +12,7 @@ RUN pip install ansible
 
 USER rundeck
 
-RUN echo "rundeck.tokens.file=/home/rundeck/etc/tokens.properties" >> /etc/remco/templates/framework.properties  
+RUN echo "rundeck.tokens.file=/run/secrets/tokens.properties" >> /etc/remco/templates/framework.properties  
 RUN mkdir -p /home/rundeck/libext
 {% for plugin in RUNDECK_PLUGINS %}
 RUN curl -sfL -o /home/rundeck/libext/{{ plugin | urlsplit('path') | basename }} {{ plugin }}
