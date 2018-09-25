@@ -13,7 +13,7 @@ RUN apt-get update  -qq \
 RUN usermod -aG docker jenkins
 
 ARG JAVA_OPTS
-ENV JAVA_OPTS "-Djenkins.install.runSetupWizard=false ${JAVA_OPTS:-}"
+ENV JAVA_OPTS "-Djenkins.install.runSetupWizard=false -Dmail.smtp.starttls.enable=true -Dmail.smtp.ssl.protocols=TLSv1.2 -Djava.util.logging.loglevel=FINE ${JAVA_OPTS:-}"
 
 COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
 RUN xargs /usr/local/bin/install-plugins.sh < /usr/share/jenkins/ref/plugins.txt

@@ -96,8 +96,7 @@
             - "DOCKER_REGISTRY_URL=https://nexus:9082/v2/"
             - "CASC_VAULT_TOKEN={{ token_result.json.auth.client_token }}"
             - "CASC_VAULT_PATH=secret/jenkins/{{ JENKINS_ORGANIZATION }}"
-            - "CASC_VAULT_URL=https://vault:8200" 
-            - "JAVA_OPTS=-Djava.util.logging.loglevel=FINE"
+            - "CASC_VAULT_URL=https://vault:8200"
           dns:
             - 'ldap'
           restart: always
