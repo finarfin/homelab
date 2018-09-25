@@ -9,6 +9,7 @@ configuration-as-code-support:latest
 job-dsl:latest
 ldap:latest
 matrix-auth:latest
+mailer:1.22-SNAPSHOT.*
 {% for item in JENKINS_ADDITIONAL_PLUGINS | default([]) %}
 {{ item }}
 {% endfor %}

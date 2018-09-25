@@ -63,7 +63,14 @@ unclassified:
         manageHooks: true
   location:
     url: "http://{{ JENKINS_NAME }}:{{ JENKINS_HTTP_PORT }}"
-    adminAddress: "example@example.com"
+    adminAddress: "jenkins@example.com"
+  mailer:
+    smtpHost: "mail-imap"
+    smtpPort: 587
+    useSsl: false
+    authentication:   
+      username: "engineer1"
+      password: "T3st123!"
 jobs:
   - script: >
       organizationFolder('{{ JENKINS_ORGANIZATION }}') {
