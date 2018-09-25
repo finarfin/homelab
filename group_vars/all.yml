@@ -93,3 +93,13 @@ RUNDECK_TOKENS:
 RUNDECK_PLUGINS:
   - https://github.com/rundeck-plugins/vault-storage/releases/download/1.1.0/vault-storage-1.1.0.jar
   - https://github.com/theque5t/rundeck-diy-webhook-notification/raw/master/build/libs/rundeck-diy-webhook-notification-1.0.0.jar
+  
+MAIL_NETWORK: '{{ COMMON_NETWORK }}'  
+MAIL_WEBMAIL_PORT: '8023'
+MAIL_IMAP_CRT: '{{ COMMON_CERT_BASE }}/mail-imap.crt'
+MAIL_IMAP_PRIVATEKEY: '{{ COMMON_CERT_BASE }}/mail-imap.pem'
+MAIL_WEBMAIL_CRT: '{{ COMMON_CERT_BASE }}/mail-webmail.crt'
+MAIL_WEBMAIL_PRIVATEKEY: '{{ COMMON_CERT_BASE }}/mail-webmail.pem'
+MAIL_CA: '{{ CA_CERT }}'
+MAIL_LDAP_USER: 'cn=Administrator,cn=Users,dc=example,dc=com'
+MAIL_LDAP_PASSWORD: '{{ SAMBA_ADMIN_PASS }}'

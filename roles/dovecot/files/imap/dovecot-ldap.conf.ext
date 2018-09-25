@@ -1,0 +1,10 @@
+hosts = ldap
+ldap_version = 3
+dn = {{ MAIL_LDAP_USER }}
+dnpass = {{ MAIL_LDAP_PASSWORD }}
+auth_bind = yes
+auth_bind_userdn = cn=%u,ou=Users,dc=example,dc=com
+base=ou=Users,dc=example,dc=com
+user_attrs = sAMAccountName=home=/var/vmail/%$, =uid=1001, =gid=1001, =mail=maildir:~/Maildir
+user_filter = (&(objectClass=user)(cn=%Ln))
+pass_filter = (&(objectClass=user)(cn=%Ln))
