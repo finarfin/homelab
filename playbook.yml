@@ -90,6 +90,16 @@
       CERT_NAME: 'vault'
       CERT_PATH: '{{ VAULT_CERT }}'
       CERT_PRIVATEKEY: '{{ VAULT_PRIVATEKEY }}'
+      
+    - role: certificate
+      CERT_NAME: 'mail-imap'
+      CERT_PATH: '{{ MAIL_IMAP_CRT }}'
+      CERT_PRIVATEKEY: '{{ MAIL_IMAP_PRIVATEKEY }}'
+      
+    - role: certificate
+      CERT_NAME: 'mail-webmail'
+      CERT_PATH: '{{ MAIL_WEBMAIL_CRT }}'
+      CERT_PRIVATEKEY: '{{ MAIL_WEBMAIL_PRIVATEKEY }}'
 
     - role: certificate
       CERT_NAME: 'artifacts'
@@ -107,3 +117,4 @@
     - role: 'gitea'
     - role: 'jenkins-master'
     - role: 'rundeck'
+    - role: 'mail'

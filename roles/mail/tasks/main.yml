@@ -1,0 +1,109 @@
+---
+- name: 'Create build targets'
+  file:
+    path: '{{ item }}'
+    state: 'directory'
+  with_items:
+    - '{{ MAIL_WEBMAIL_BUILD_PATH }}'
+    - '{{ MAIL_IMAP_BUILD_PATH }}'
+   
+- name: 'Copy CA Cert'
+  copy:
+    src: '{{ MAIL_CA }}'
+    dest: '{{ MAIL_WEBMAIL_BUILD_PATH }}/ca.crt'
+    
+- name: 'Copy imap files'
+  copy:
+    src: '{{ item }}'
+    dest: '{{ MAIL_IMAP_BUILD_PATH }}/{{ item | basename }}'
+  with_fileglob: 
+    - 'files/imap/*'
+    
+- name: 'Copy webmail files'
+  copy:
+    src: '{{ item }}'
+    dest: '{{ MAIL_WEBMAIL_BUILD_PATH }}/{{ item | basename }}'
+  with_fileglob: 
+    - 'files/webmail/*'
+    
+- name: 'Create containers for mail infrastructure'
+  docker_service:
+    project_name: '{{ MAIL_NAME }}'
+    build: yes
+    definition:    
+      version: '3.5'
+      networks: '{{ MAIL_NETWORK | default(omit) }}'
+      services:
+        imap:
+          build: '{{ MAIL_IMAP_BUILD_PATH }}'
+          image: '{{ MAIL_NAME }}-imap'
+          hostname: 'mail'
+          domainname: 'example.com'
+          container_name: '{{ MAIL_NAME }}-imap'
+          ports:
+             - '{{ MAIL_SMTP_PORT }}:587'
+             - '{{ MAIL_IMAPS_PORT }}:993'
+          environment:
+            - 'ENABLE_LDAP=1'
+            - 'LDAP_SERVER_HOST=ldap'
+            - 'LDAP_SEARCH_BASE=ou=Users,dc=example,dc=com'
+            - 'LDAP_BIND_DN={{ MAIL_LDAP_USER }}'
+            - 'LDAP_BIND_PW={{ MAIL_LDAP_PASSWORD }}'
+            - 'LDAP_QUERY_FILTER_USER=(&(objectClass=user)(mail=%s))'
+            - 'LDAP_QUERY_FILTER_GROUP=(&(objectclass=group)(mail=%s))'
+            - 'LDAP_QUERY_FILTER_ALIAS=(&(objectClass=user)(otherMailbox=%s))'
+            - 'LDAP_QUERY_FILTER_DOMAIN=(&(|(mail=*@%s)(mailalias=*@%s)(mailGroupMember=*@%s))(mailEnabled=TRUE))'
+            - 'DOVECOT_USER_FILTER="(&(objectClass=user)(cn=%Ln))"'
+            - 'DOVECOT_PASS_FILTER="(&(objectClass=user)(cn=%Ln))"'
+            - 'DOVECOT_AUTH_BIND=yes'
+            - 'DOVECOT_AUTH_BIND_USERDN="cn=%u,ou=Users,dc=example,dc=com"'
+            - 'DOVECOT_USER_ATTRS="=home=/var/mail/example.com/%n, =uid=5000, =gid=5000, =mail=maildir:/var/mail/example.com/%n/Maildir, =home=/var/mail/example.com/%n'
+            - 'SSL_TYPE=manual'
+            - 'SSL_CERT_PATH=/run/secrets/imap.crt'
+            - 'SSL_KEY_PATH=/run/secrets/imap.pem'
+            - 'ENABLE_SPAMASSASSIN=0'            
+            - 'ENABLE_CLAMAV=0'
+            - 'ENABLE_FAIL2BAN=0'
+            - 'ENABLE_POSTGREY=0'
+            - 'ONE_DIR=1'
+            - 'DMS_DEBUG=1'
+            - 'ENABLE_SASLAUTHD=1'
+            - 'SASLAUTHD_LDAP_SERVER=ldap'
+            - 'SASLAUTHD_LDAP_BIND_DN={{ MAIL_LDAP_USER }}'
+            - 'SASLAUTHD_LDAP_PASSWORD={{ MAIL_LDAP_PASSWORD }}'
+            - 'SASLAUTHD_LDAP_SEARCH_BASE=ou=Users,dc=example,dc=com'
+            - 'SASLAUTHD_LDAP_FILTER=(&(objectClass=user)(cn=%U))'
+            - 'SASLAUTHD_MECHANISMS=ldap'
+            - 'POSTMASTER_ADDRESS=postmaster@example.com'
+          secrets:
+            - 'imap.crt'
+            - 'imap.pem'
+          restart: 'always'
+        webmail:
+          build: '{{ MAIL_WEBMAIL_BUILD_PATH }}'
+          image: '{{ MAIL_NAME }}-webmail'
+          container_name: '{{ MAIL_NAME }}-webmail'
+          environment:
+            - 'ROUNDCUBEMAIL_DEFAULT_HOST=ssl://{{ MAIL_NAME }}-imap'
+            - 'ROUNDCUBEMAIL_DEFAULT_PORT={{ MAIL_IMAPS_PORT }}'
+            - 'ROUNDCUBEMAIL_SMTP_SERVER=tls://{{ MAIL_NAME }}-imap'
+            - 'ROUNDCUBEMAIL_SMTP_PORT={{ MAIL_SMTP_PORT }}'
+          ports:
+            - '{{ MAIL_WEBMAIL_PORT }}:80'
+          secrets:
+            - { source: 'imap.crt', target: '/etc/ssl/certs/mail-imap.pem' }
+            - 'webmail.crt'
+            - 'webmail.pem'
+          restart: 'always' 
+      configs:
+        dovecot-ldap.conf.ext:
+            file: '/tmp/dovecot-ldap.conf.ext'
+      secrets:
+        imap.crt:
+          file: '{{ MAIL_IMAP_CRT }}'
+        imap.pem:
+          file: '{{ MAIL_IMAP_PRIVATEKEY }}'
+        webmail.crt:
+          file: '{{ MAIL_WEBMAIL_CRT }}'
+        webmail.pem:
+          file: '{{ MAIL_WEBMAIL_PRIVATEKEY }}'
