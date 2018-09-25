@@ -101,6 +101,3 @@
             - 'ldap'
           restart: always
   register: result
-  
-- debug:
-    var: result
