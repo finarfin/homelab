@@ -58,7 +58,7 @@
         
     - name: 'Install python dependencies'
       pip:
-        name: 'docker,docker-compose,python-ldap'
+        name: 'docker,docker-compose,python-ldap,sqlalchemy'
 
     - name: 'Create homelab network'
       docker_network:
