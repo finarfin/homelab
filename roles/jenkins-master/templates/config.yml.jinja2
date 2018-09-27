@@ -8,7 +8,9 @@ credentials:
             username: "${GITEA_USER}"
             password: "${GITEA_PASSWORD}"
 jenkins:
-  agentProtocols: []
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
   authorizationStrategy: 
     projectMatrix:
       grantedPermissions:
@@ -16,6 +18,19 @@ jenkins:
         - "Overall/Read:Developers"
         - "Overall/Read:Operations"
   crumbIssuer: standard
+  nodes:
+  - permanent:
+      labelString: "windows packer"
+      launcher:
+        jnlp:
+          workDirSettings:
+            disabled: false
+            failIfWorkDirIsMissing: true
+            internalDir: "remoting"
+      mode: EXCLUSIVE
+      name: "windows1"
+      numExecutors: 1
+      remoteFS: "C:\\temp\\jenkins"  
   remotingSecurity:
     enabled: true
   securityRealm:
