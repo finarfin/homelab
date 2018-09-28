@@ -5,3 +5,23 @@ GITEA_SSH_PORT: 22
 GITEA_DATASTORE: '/data/gitea'
 GITEA_ADMIN_NAME: 'root'
 GITEA_ADMIN_EMAIL: 'example@example.com'
+GITEA_LDAP_CONFIG:
+  Name: 'ldap'
+  Host: 'ldap'
+  Port: 389
+  SecurityProtocol: 0
+  SkipVerify: false
+  BindDN: 'cn=Administrator,cn=Users,dc=example,dc=com'
+  BindPassword: 'TopS3cr3t'
+  UserBase: 'ou=Users,dc=example,dc=com'
+  UserDN: ''
+  AttributeUsername: 'cn'
+  AttributeName: ''
+  AttributeSurname: ''
+  AttributeMail: 'mail'
+  AttributesInBind: false
+  AttributeSSHPublicKey: ''
+  SearchPageSize: 0
+  Filter: '(&(objectclass=user)(sAMAccountName=%s))'
+  AdminFilter: '(&(objectclass=user)(sAMAccountName=Administrator))'
+  Enabled: true

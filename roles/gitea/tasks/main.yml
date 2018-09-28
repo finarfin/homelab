@@ -36,3 +36,11 @@
   register: command_result
   failed_when: 'command_result.rc != 0 and "user already exists" not in command_result.stderr'
   changed_when: 'command_result.rc == 0'
+  
+- name: 'Configure LDAP'
+  tags: test
+  sql:
+    connection: 'sqlite+pysqlite:///{{ GITEA_DATASTORE }}/gitea/gitea.db'
+    test_query: "SELECT COUNT(*) FROM login_source WHERE name='ldap'"
+    test_result: 1
+    query: "INSERT INTO login_source (type, name, is_actived, is_sync_enabled, cfg, created_unix, updated_unix) VALUES (2, 'ldap', 1, 1, '{{ GITEA_LDAP_CONFIG | to_json | replace(\"'\", \"''\") }}', {{ ansible_date_time.epoch }}, {{ ansible_date_time.epoch }})"
