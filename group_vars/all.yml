@@ -28,6 +28,21 @@ GITEA_SSH_PORT: 10022
 GITEA_ADMIN_NAME: 'root'
 GITEA_ADMIN_PASS: 'test'
 GITEA_ADMIN_EMAIL: 'example@example.com'
+GITEA_ORGANIZATIONS:
+  - name: master
+    users:
+      - engineer1
+      - engineer2
+      - developer1
+      - developer2
+      - operator1
+      - operator2
+  - name: devops
+    users:
+      - engineer2
+      - engineer1
+      - operator1
+
 
 JENKINS_NETWORK: '{{ COMMON_NETWORK }}'
 JENKINS_HTTP_PORT: 8080

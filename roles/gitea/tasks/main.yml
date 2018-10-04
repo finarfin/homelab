@@ -17,6 +17,7 @@
             - 'INSTALL_LOCK=true'
             - 'DISABLE_REGISTRATION=true'
             - 'SECRET_KEY=test'
+            - 'ROOT_URL=http://gitea:3000/'
           volumes:
             - '{{ GITEA_DATASTORE }}:/data'
           restart: always                
@@ -38,9 +39,59 @@
   changed_when: 'command_result.rc == 0'
   
 - name: 'Configure LDAP'
-  tags: test
   sql:
     connection: 'sqlite+pysqlite:///{{ GITEA_DATASTORE }}/gitea/gitea.db'
     test_query: "SELECT COUNT(*) FROM login_source WHERE name='ldap'"
     test_result: 1
     query: "INSERT INTO login_source (type, name, is_actived, is_sync_enabled, cfg, created_unix, updated_unix) VALUES (2, 'ldap', 1, 1, '{{ GITEA_LDAP_CONFIG | to_json | replace(\"'\", \"''\") }}', {{ ansible_date_time.epoch }}, {{ ansible_date_time.epoch }})"
+
+- name: 'Check organizations'
+  uri:
+    url: 'http://127.0.0.1:{{ GITEA_HTTP_PORT }}/api/v1/orgs/{{ item.name }}'
+    force_basic_auth: yes
+    user: '{{ GITEA_ADMIN_NAME }}'
+    password: '{{ GITEA_ADMIN_PASS }}'
+    status_code: 200, 404
+  with_items: '{{ GITEA_ORGANIZATIONS }}'
+  register: orgs_result
+
+- name: 'Create organization'
+  when: 'item.name in (orgs_result.results | selectattr("status", "equalto", 404) | map(attribute="item.name"))'
+  uri:
+    url: 'http://127.0.0.1:{{ GITEA_HTTP_PORT }}/api/v1/admin/users/{{ GITEA_ADMIN_NAME }}/orgs'
+    force_basic_auth: yes
+    user: '{{ GITEA_ADMIN_NAME }}'
+    password: '{{ GITEA_ADMIN_PASS }}'
+    method: 'POST'
+    body_format: 'json'
+    body:
+      UserName: '{{ item.name }}'
+    status_code: 201
+  with_items: '{{ GITEA_ORGANIZATIONS }}'
+
+- name: 'Get organization teams'
+  uri:
+    url: 'http://127.0.0.1:{{ GITEA_HTTP_PORT }}/api/v1/orgs/{{ item.name }}/teams'
+    force_basic_auth: yes
+    user: '{{ GITEA_ADMIN_NAME }}'
+    password: '{{ GITEA_ADMIN_PASS }}'
+    status_code: 200
+    return_content: yes
+  with_items: '{{ GITEA_ORGANIZATIONS }}'
+  register: teams_result
+
+- name: 'Add members to Owners team'
+  uri:
+    url: 'http://127.0.0.1:{{ GITEA_HTTP_PORT }}/api/v1/teams/{{ TEAM_ID }}/members/{{ item.1 }}'
+    force_basic_auth: yes
+    user: '{{ GITEA_ADMIN_NAME }}'
+    password: '{{ GITEA_ADMIN_PASS }}'
+    method: 'PUT'
+    status_code: 204
+  vars:
+    TEAM_ID: '{{ (teams_result.results | selectattr("item.name", "equalto", item.0.name) | list | first).json | selectattr("name", "equalto", "Owners") | map(attribute="id") | first }}'
+  with_subelements:
+    - '{{ GITEA_ORGANIZATIONS }}'
+    - users
+
+#- name: 'Add to organization'
