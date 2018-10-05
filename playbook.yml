@@ -34,7 +34,7 @@
     
     - name: 'Configure docker daemon'
       copy:
-        content: '{ "data-root": "/mnt/docker" }'
+        content: '{ "dns": ["10.0.2.3"], "data-root": "/mnt/docker" }'
         dest: '/etc/docker/daemon.json'
         owner: 'root'
         group: 'root'

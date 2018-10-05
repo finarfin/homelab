@@ -15,6 +15,8 @@ Vagrant.configure("2") do |config|
     unless File.exist?(vdisk_name)
        vbox.customize ['createhd', '--filename', vdisk_name, '--size', "#{30*1024}"]
     end
+    vbox.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+    vbox.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
     vbox.customize ['storageattach', :id, '--storagectl', "SCSI", '--port', 2, '--device', 0, '--type', 'hdd', '--medium', vdisk_name]        
   end   
 
