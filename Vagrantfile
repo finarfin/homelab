@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "ansible_local" do |ansible|
     ansible.install_mode = :pip
     ansible.version = "2.6.4"
-    ansible.playbook_command = "ANSIBLE_FORCE_COLOR=true ansible-playbook"
+    ansible.playbook_command = "ANSIBLE_FORCE_COLOR=true GIT_SSL_NO_VERIFY=true ansible-playbook"
     ansible.playbook = "playbook.yml"
   end      
 end
