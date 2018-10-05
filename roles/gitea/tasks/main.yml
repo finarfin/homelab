@@ -45,6 +45,18 @@
     test_result: 1
     query: "INSERT INTO login_source (type, name, is_actived, is_sync_enabled, cfg, created_unix, updated_unix) VALUES (2, 'ldap', 1, 1, '{{ GITEA_LDAP_CONFIG | to_json | replace(\"'\", \"''\") }}', {{ ansible_date_time.epoch }}, {{ ansible_date_time.epoch }})"
 
+- name: 'Sync LDAP users'
+  uri:
+    url: 'http://127.0.0.1:{{ GITEA_HTTP_PORT }}/admin?op=8'
+    force_basic_auth: yes
+    follow_redirects: none
+    user: '{{ GITEA_ADMIN_NAME }}'
+    password: '{{ GITEA_ADMIN_PASS }}'
+    status_code: 302
+    return_content: yes
+  register: sync_result
+  failed_when: 'sync_result.status != 302 or "macaron_flash=success" not in sync_result.set_cookie'
+  
 - name: 'Check organizations'
   uri:
     url: 'http://127.0.0.1:{{ GITEA_HTTP_PORT }}/api/v1/orgs/{{ item.name }}'
